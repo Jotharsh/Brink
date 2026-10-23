@@ -25,7 +25,7 @@ enum Preview {
             png("music-\(anim.rawValue)", GlowFrame(time: 3, bands: bands, musicLevel: 1, pulses: [], musicAnimation: anim))
         }
         for style in GlowStyle.allCases {
-            png("colours-\(style.rawValue)", GlowFrame(time: 3, bands: bands, musicLevel: 1, pulses: [], musicColors: style.colors, musicAnimation: .pulse))
+            png("colours-\(style.rawValue)", GlowFrame(time: 3, bands: bands, musicLevel: 1, pulses: [], musicColors: style.colors, musicAnimation: .flow))
         }
         let blue = NotificationClassifier.classify(["Messages"]).color
         for anim in AlertAnimation.allCases {

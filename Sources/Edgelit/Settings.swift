@@ -21,7 +21,7 @@ final class Settings {
         set { d.set(newValue.prefix(3).map(\.hex), forKey: "musicColors") }
     }
     var musicAnimation: MusicAnimation {
-        get { MusicAnimation(rawValue: d.string(forKey: "musicAnimation") ?? "") ?? .spectrum }
+        get { MusicAnimation(rawValue: d.string(forKey: "musicAnimation") ?? "") ?? .pulse }
         set { d.set(newValue.rawValue, forKey: "musicAnimation") }
     }
 

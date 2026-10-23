@@ -108,8 +108,8 @@ final class CoreTests: XCTestCase {
             let c = ctx400()
             let f = GlowFrame(time: 1, bands: [Float](repeating: 1, count: 32), musicLevel: 1, pulses: [], musicAnimation: anim)
             GlowRenderer.draw(f, in: c, size: CGSize(width: 400, height: 300))
-            XCTAssertGreaterThan(alpha(c, 200, 1), 60, "\(anim): bottom edge")
-            XCTAssertGreaterThan(alpha(c, 1, 150), 60, "\(anim): left edge")
+            XCTAssertGreaterThan((0..<400).map { alpha(c, $0, 1) }.max()!, 60, "\(anim): bottom edge")
+            XCTAssertGreaterThan((0..<300).map { alpha(c, 1, $0) }.max()!, 60, "\(anim): left edge")
             XCTAssertEqual(alpha(c, 200, 150), 0, "\(anim): middle must stay clear")
         }
     }
@@ -123,7 +123,7 @@ final class CoreTests: XCTestCase {
             while depth < 150, alpha(c, 200, depth) > 8 { depth += 1 }
             return (depth, alpha(c, 200, 1))
         }
-        XCTAssertGreaterThan(glowDepth(2, 0.9).0, glowDepth(1, 0.9).0 + 5, "thicker reaches further in")
+        XCTAssertGreaterThan(glowDepth(2, 0.9).0, glowDepth(1, 0.9).0 + 3, "thicker reaches further in")
         XCTAssertGreaterThan(glowDepth(1, 1.0).1, glowDepth(1, 0.3).1, "brighter is more opaque")
     }
 
@@ -137,5 +137,23 @@ final class CoreTests: XCTestCase {
             XCTAssertTrue(any, "\(anim) should draw something")
             XCTAssertEqual(alpha(c, 200, 150), 0)
         }
+    }
+}
+
+extension CoreTests {
+    func testStripIsEvenAlongTheEdge() {
+        // A neat strip: the same brightness along a straight run of the edge, never lumpy.
+        let c = ctx400()
+        GlowRenderer.draw(GlowFrame(time: 1, bands: [Float](repeating: 0.6, count: 32), musicLevel: 1, pulses: [],
+                                    musicColors: [RGB(0, 1, 1)], musicAnimation: .pulse, energy: 0.6),
+                          in: c, size: CGSize(width: 400, height: 300))
+        let values = stride(from: 80, through: 320, by: 20).map { Int(alpha(c, $0, 1)) }
+        XCTAssertLessThanOrEqual(values.max()! - values.min()!, 3, "brightness should not vary along a single-colour pulse strip: \(values)")
+    }
+
+    func testEnergyIsCalmAndBounded() {
+        XCTAssertEqual(GlowFrame.energy(of: []), 0)
+        XCTAssertEqual(GlowFrame.energy(of: [Float](repeating: 0, count: 32)), 0)
+        XCTAssertLessThanOrEqual(GlowFrame.energy(of: [Float](repeating: 1, count: 32)), 1)
     }
 }

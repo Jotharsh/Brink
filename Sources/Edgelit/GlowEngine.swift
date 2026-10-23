@@ -12,6 +12,8 @@ final class GlowEngine {
     private let pipeline: AudioPipeline
     private var smoother = BandSmoother(bandCount: 32)
     private var musicLevel: Float = 0
+    private var energy: Float = 0
+    private var phase: Double = 0
     private var pulses: [GlowPulse] = []
     private var demoUntil: Double = 0
     private let settings = Settings.shared
@@ -81,6 +83,10 @@ final class GlowEngine {
 
         let target: [Float] = demo ? Self.demoBands(at: now) : (sounding ? reading.bands : [Float](repeating: 0, count: 32))
         let bands = smoother.update(target, dt: dt)
+        // One calm loudness number: quick enough to feel the beat, slow enough never to flicker.
+        let raw = GlowFrame.energy(of: bands)
+        energy += (raw - energy) * (1 - expf(-dt / (raw > energy ? 0.09 : 0.5)))
+        phase = (phase + Double(dt) * Double(0.05 + 0.12 * energy)).truncatingRemainder(dividingBy: 1)
         let goal: Float = sounding ? 1 : 0
         let tau: Float = goal > musicLevel ? 0.35 : 0.9
         musicLevel += (goal - musicLevel) * (1 - expf(-dt / tau))
@@ -92,7 +98,8 @@ final class GlowEngine {
         let frame = GlowFrame(time: now, bands: bands, musicLevel: musicLevel, pulses: pulses,
                               musicColors: settings.musicColors, musicAnimation: settings.musicAnimation,
                               alertAnimation: settings.alertAnimation,
-                              thickness: CGFloat(settings.thickness), brightness: CGFloat(settings.brightness))
+                              thickness: CGFloat(settings.thickness), brightness: CGFloat(settings.brightness),
+                              energy: energy, phase: phase)
         for w in windows {
             w.glow.show(frame)
         }
@@ -108,6 +115,7 @@ final class GlowEngine {
     private func sleep() {
         timer?.invalidate(); timer = nil
         smoother.reset()
+        energy = 0
         windows.forEach { $0.orderOut(nil) }
     }
 
