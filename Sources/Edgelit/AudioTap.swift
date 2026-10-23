@@ -22,6 +22,7 @@ final class AudioTap: NSObject, SCStreamOutput, SCStreamDelegate {
     func start() {
         guard !running else { return }
         running = true
+        Log.write("music: starting audio capture")
         Task {
             do {
                 let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: false)
@@ -33,16 +34,18 @@ final class AudioTap: NSObject, SCStreamOutput, SCStreamDelegate {
                 cfg.sampleRate = 48000
                 cfg.channelCount = 2
                 // We only want sound, so ask for the smallest, slowest picture possible.
-                cfg.width = 2; cfg.height = 2
-                cfg.minimumFrameInterval = CMTime(value: 1, timescale: 1)
+                cfg.width = 64; cfg.height = 64
+                cfg.minimumFrameInterval = CMTime(value: 1, timescale: 2)
                 cfg.queueDepth = 3
                 let s = SCStream(filter: filter, configuration: cfg, delegate: self)
                 try s.addStreamOutput(self, type: .audio, sampleHandlerQueue: queue)
                 try s.addStreamOutput(self, type: .screen, sampleHandlerQueue: queue)
                 try await s.startCapture()
                 self.stream = s
+                Log.write("music: audio capture running")
             } catch {
                 self.running = false
+                Log.write("music: capture failed: \(error)")
                 DispatchQueue.main.async { self.onError?(error.localizedDescription) }
             }
         }
@@ -59,6 +62,7 @@ final class AudioTap: NSObject, SCStreamOutput, SCStreamDelegate {
     func stream(_ stream: SCStream, didStopWithError error: Error) {
         running = false
         self.stream = nil
+        Log.write("music: capture stopped: \(error)")
         DispatchQueue.main.async { self.onError?(error.localizedDescription) }
     }
 

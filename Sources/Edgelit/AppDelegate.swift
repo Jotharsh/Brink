@@ -34,6 +34,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         watcher.onBanner = { [weak self] texts in self?.banner(texts) }
         watcher.onCallEnded = { [weak self] in self?.engine.clearCalls() }
 
+        Log.write("launch: screen recording \(AudioTap.hasPermission ? "allowed" : "not allowed"), accessibility \(NotificationWatcher.isTrusted ? "allowed" : "not allowed")")
         applyListeners()
     }
 
@@ -102,6 +103,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                                     action: #selector(grantScreen)))
         menu.addItem(permissionItem(ok: NotificationWatcher.isTrusted, name: "Accessibility (for notifications)",
                                     action: #selector(grantAccessibility)))
+        if !AudioTap.hasPermission || !NotificationWatcher.isTrusted {
+            menu.addItem(action("Restart Edgelit (after allowing, to apply)", #selector(restart)))
+        }
         if let e = lastAudioError, settings.music, AudioTap.hasPermission {
             let item = NSMenuItem(title: "Audio problem: \(e)", action: nil, keyEquivalent: "")
             item.isEnabled = false
@@ -118,6 +122,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         test.submenu = testMenu
         menu.addItem(test)
         menu.addItem(.separator())
+        menu.addItem(action("Show log in Finder", #selector(showLog)))
         menu.addItem(action("Quit Edgelit", #selector(quit), key: "q"))
     }
 
@@ -186,6 +191,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc private func stopCall() { engine.clearCalls() }
     @objc private func testMusic() { engine.runMusicDemo() }
     @objc private func quit() { NSApp.terminate(nil) }
+
+    /// macOS only applies a new Screen Recording or Accessibility permission to a fresh launch.
+    @objc private func restart() {
+        let cfg = NSWorkspace.OpenConfiguration()
+        cfg.createsNewApplicationInstance = true
+        NSWorkspace.shared.openApplication(at: Bundle.main.bundleURL, configuration: cfg) { _, _ in
+            DispatchQueue.main.async { NSApp.terminate(nil) }
+        }
+    }
+
+    @objc private func showLog() { NSWorkspace.shared.activateFileViewerSelecting([Log.url]) }
 
     private func open(_ s: String) { if let u = URL(string: s) { NSWorkspace.shared.open(u) } }
 }

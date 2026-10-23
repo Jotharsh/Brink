@@ -21,8 +21,9 @@ final class NotificationWatcher {
     static var isTrusted: Bool { AXIsProcessTrusted() }
 
     static func promptForAccess() {
-        let opts = ["AXTrustedCheckOptTrustedCheckOptionPrompt": true] as CFDictionary
-        _ = AXIsProcessTrustedWithOptions(opts)
+        // Must use Apple's own key constant; a hand-typed key crashes inside macOS.
+        let key = kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String
+        _ = AXIsProcessTrustedWithOptions([key: true] as CFDictionary)
     }
 
     func start() {
@@ -43,8 +44,10 @@ final class NotificationWatcher {
     // MARK: attach
 
     private func attach() {
-        guard Self.isTrusted,
-              let app = NSRunningApplication.runningApplications(withBundleIdentifier: Self.bundleID).first else { return }
+        guard Self.isTrusted else { Log.write("notifications: Accessibility not allowed yet"); return }
+        guard let app = NSRunningApplication.runningApplications(withBundleIdentifier: Self.bundleID).first else {
+            Log.write("notifications: Notification Center process not found"); return
+        }
         let pid = app.processIdentifier
         guard pid != attachedPID else { return }
         detach()
@@ -54,7 +57,8 @@ final class NotificationWatcher {
             guard let refcon else { return }
             Unmanaged<NotificationWatcher>.fromOpaque(refcon).takeUnretainedValue().bannerAppeared()
         }
-        guard AXObserverCreate(pid, callback, &obs) == .success, let obs else { return }
+        let created = AXObserverCreate(pid, callback, &obs)
+        guard created == .success, let obs else { Log.write("notifications: could not observe Notification Center (\(created.rawValue))"); return }
         let element = AXUIElementCreateApplication(pid)
         let me = Unmanaged.passUnretained(self).toOpaque()
         for name in [kAXWindowCreatedNotification, kAXCreatedNotification] {
@@ -63,6 +67,7 @@ final class NotificationWatcher {
         CFRunLoopAddSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(obs), .commonModes)
         observer = obs
         attachedPID = pid
+        Log.write("notifications: watching Notification Center (pid \(pid))")
     }
 
     private func detach() {
@@ -91,6 +96,7 @@ final class NotificationWatcher {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) { [weak self] in
             guard let self else { return }
             let texts = Self.bannerTexts(pid: self.attachedPID)
+            Log.write("notifications: banner event, text: \(texts.prefix(4))")
             guard !texts.isEmpty else { return }
             self.lastFired = CACurrentMediaTime()
             self.onBanner?(texts)
