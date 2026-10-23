@@ -106,8 +106,8 @@ public enum GlowRenderer {
             switch f.musicAnimation {
             case .pulse:
                 along = [CGFloat](repeating: 1, count: 2)
-                depth = base * (0.9 + 0.25 * energy)
-                brightness *= 0.30 + 0.70 * energy
+                depth = base * (0.85 + 0.40 * energy)
+                brightness *= 0.14 + 0.86 * energy
                 colours = alongEdge(f.musicColors, phase: f.phase * 0.5, spread: 0.6)
             case .flow:
                 // One soft highlight travelling round the screen over a steady, dimmer glow.
@@ -115,7 +115,7 @@ public enum GlowRenderer {
                     let s = (u * Double(length) + sideOffset(side, size)) / Double(perimeter(size))
                     return CGFloat(0.55 + 0.45 * cos(2 * .pi * (s - f.phase)))
                 }
-                brightness *= 0.35 + 0.65 * energy
+                brightness *= 0.18 + 0.82 * energy
                 colours = alongEdge(f.musicColors, phase: f.phase, spread: 1)
             case .segments:
                 let n = 14

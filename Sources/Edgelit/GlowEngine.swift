@@ -10,7 +10,9 @@ final class GlowEngine {
     private var idleSince: Double?
 
     private let pipeline: AudioPipeline
-    private var smoother = BandSmoother(bandCount: 32)
+    private var smoother: BandSmoother = { var s = BandSmoother(bandCount: 32); s.release = 0.13; return s }()
+    private var beat = BeatTracker()
+    private var lastReport: Double = 0
     private var musicLevel: Float = 0
     private var energy: Float = 0
     private var phase: Double = 0
@@ -83,10 +85,17 @@ final class GlowEngine {
 
         let target: [Float] = demo ? Self.demoBands(at: now) : (sounding ? reading.bands : [Float](repeating: 0, count: 32))
         let bands = smoother.update(target, dt: dt)
-        // One calm loudness number: quick enough to feel the beat, slow enough never to flicker.
-        let raw = GlowFrame.energy(of: bands)
-        energy += (raw - energy) * (1 - expf(-dt / (raw > energy ? 0.09 : 0.5)))
-        phase = (phase + Double(dt) * Double(0.05 + 0.12 * energy)).truncatingRemainder(dividingBy: 1)
+        // Follow the beat: bass counts most, low-mids add body. Raw bands are used (not the smoothed ones)
+        // so the kick is not blurred away.
+        let live: [Float] = demo ? Self.demoBands(at: now) : reading.bands
+        let bass = live.prefix(8).reduce(0, +) / 8
+        let body = live.dropFirst(8).prefix(8).reduce(0, +) / 8
+        energy = sounding ? beat.update(bass * 0.75 + body * 0.25, dt: dt) : beat.update(0, dt: dt)
+        phase = (phase + Double(dt) * Double(0.03 + 0.10 * energy)).truncatingRemainder(dividingBy: 1)
+        if sounding, now - lastReport > 5 {
+            lastReport = now
+            Log.write(String(format: "music: level %.3f rms %.4f beat %.2f", bass, reading.rms, energy))
+        }
         let goal: Float = sounding ? 1 : 0
         let tau: Float = goal > musicLevel ? 0.35 : 0.9
         musicLevel += (goal - musicLevel) * (1 - expf(-dt / tau))
@@ -115,6 +124,7 @@ final class GlowEngine {
     private func sleep() {
         timer?.invalidate(); timer = nil
         smoother.reset()
+        beat.reset()
         energy = 0
         windows.forEach { $0.orderOut(nil) }
     }

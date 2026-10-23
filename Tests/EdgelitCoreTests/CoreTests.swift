@@ -157,3 +157,34 @@ extension CoreTests {
         XCTAssertLessThanOrEqual(GlowFrame.energy(of: [Float](repeating: 1, count: 32)), 1)
     }
 }
+
+extension CoreTests {
+    func testBeatTrackerFollowsKicksAndIgnoresSteadyLoudness() {
+        var t = BeatTracker()
+        var onBeat: [Float] = [], between: [Float] = []
+        for frame in 0..<(60 * 12) {                                   // 12 seconds, a kick every half second
+            let sec = Double(frame) / 60
+            let phase = sec.truncatingRemainder(dividingBy: 0.5)
+            let level: Float = phase < 0.08 ? 0.85 : 0.45
+            let v = t.update(level, dt: 1 / 60)
+            if sec > 8 { if phase > 0.05 && phase < 0.08 { onBeat.append(v) }; if phase > 0.4 { between.append(v) } }
+        }
+        XCTAssertGreaterThan(onBeat.max()!, 0.7, "each kick should reach nearly the top")
+        XCTAssertLessThan(between.max()!, 0.2, "the gaps between kicks should fall back")
+
+        var steady = BeatTracker()
+        var last: Float = 1
+        for _ in 0..<(60 * 8) { last = steady.update(0.8, dt: 1 / 60) }
+        XCTAssertLessThan(last, 0.1, "a flat, loud signal has no beat")
+
+        var quiet = BeatTracker()                                      // same pattern, much quieter song
+        var peak: Float = 0
+        for frame in 0..<(60 * 12) {
+            let phase = (Double(frame) / 60).truncatingRemainder(dividingBy: 0.5)
+            let v = quiet.update(phase < 0.08 ? 0.35 : 0.18, dt: 1 / 60)
+            if frame > 60 * 8 { peak = max(peak, v) }
+        }
+        XCTAssertGreaterThan(peak, 0.6, "a quiet song's beats should still reach the top")
+    }
+}
+
