@@ -2,9 +2,9 @@
 
 Soft light along the edges of your Mac's screen that moves with your music and lights up for notifications and calls. It lives in the menu bar, stays out of the way, and you choose the colours and the animations.
 
-- **Music:** reacts to whatever your Mac is playing (Spotify, Apple Music, YouTube, anything). Three animations: **Spectrum**, **Pulse**, **Flow**.
+- **Music:** reacts to whatever your Mac is playing (Spotify, Apple Music, YouTube, anything). Three animations: **Pulse**, **Flow**, **Segments**.
 - **Notifications and calls:** a glow when a banner appears, in the app's own colour or one you pick. Calls keep glowing until they end. Three animations: **Pulse**, **Sweep**, **Blink**.
-- **Minimal by default:** a slim glow that never covers the middle of the screen, and the click-through overlay never gets in your way.
+- **Minimal by default:** a thin, even strip of light that never covers the middle of the screen, and the click-through overlay never gets in your way.
 - **Yours to edit:** menu bar icon ▸ **Customise…** for colours (presets or up to three of your own), animation types, thickness and brightness. Changes show live.
 - **Private:** no network access, no accounts. Audio is turned into a few loudness numbers and thrown away; nothing is recorded or saved.
 
@@ -56,7 +56,7 @@ Sources/EdgelitCore/   no windows: spectrum analysis (FFT), smoothing, colours, 
 Sources/Edgelit/       the app: overlay windows, audio capture, notification watcher, settings window
 ```
 
-The glow is drawn small and stretched by the GPU, so a frame costs about 3 ms and the overlay sleeps completely when nothing is happening.
+The glow is drawn small and stretched by the GPU, so a frame costs about 1 to 3 ms and the overlay sleeps completely when nothing is happening.
 
 ## License
 
