@@ -33,7 +33,7 @@ final class SettingsModel: ObservableObject {
         colorCount = colors.count
         c1 = colors[0].color
         c2 = (colors.count > 1 ? colors[1] : GlowStyle.aurora.colors[1]).color
-        c3 = (colors.count > 2 ? colors[2] : RGB(1.0, 0.35, 0.7)).color
+        c3 = (colors.count > 2 ? colors[2] : RGB(0.80, 0.18, 0.50)).color
         alertAnimation = Settings.shared.alertAnimation
         matchApp = Settings.shared.matchAppColour
         notificationColor = Settings.shared.notificationColor.color

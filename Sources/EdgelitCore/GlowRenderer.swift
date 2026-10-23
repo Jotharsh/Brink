@@ -82,7 +82,8 @@ public enum GlowRenderer {
 
     public static func draw(_ f: GlowFrame, in ctx: CGContext, size: CGSize) {
         ctx.saveGState()
-        ctx.setBlendMode(.plusLighter)
+        // Normal blending keeps each colour true. Adding light instead washes colours out towards white.
+        ctx.setBlendMode(.normal)
         let base = min(size.width, size.height) * 0.034 * f.thickness
         if f.musicLevel > 0.005 { drawMusic(f, ctx, size, base: base) }
         for pulse in f.pulses { drawAlert(pulse, f, ctx, size, base: base) }

@@ -11,16 +11,20 @@ enum Preview {
         var t = 10.0
         for _ in 0..<158 { bands = smoother.update(GlowEngine.demoBands(at: t), dt: 1 / 60); t += 1 / 60 }
 
-        func png(_ name: String, _ frame: GlowFrame) {
+        func png(_ name: String, _ frame: GlowFrame, light: Bool = false) {
             let ctx = CGContext(data: nil, width: Int(size.width), height: Int(size.height), bitsPerComponent: 8, bytesPerRow: 0,
                                 space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
-            ctx.setFillColor(CGColor(srgbRed: 0.07, green: 0.07, blue: 0.08, alpha: 1))     // stand-in desktop
+            ctx.setFillColor(light ? CGColor(srgbRed: 0.93, green: 0.93, blue: 0.94, alpha: 1) : CGColor(srgbRed: 0.07, green: 0.07, blue: 0.08, alpha: 1))     // stand-in desktop
             ctx.fill(CGRect(origin: .zero, size: size))
             GlowRenderer.draw(frame, in: ctx, size: size)
             let rep = NSBitmapImageRep(cgImage: ctx.makeImage()!)
             try? rep.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: folder + "/" + name + ".png"))
         }
 
+        let soft = { (f: GlowFrame) -> GlowFrame in var g = f; g.brightness = 0.65; return g }
+        png("light-pulse", soft(GlowFrame(time: 3, bands: bands, musicLevel: 1, pulses: [], musicAnimation: .pulse)), light: true)
+        png("dark-pulse", soft(GlowFrame(time: 3, bands: bands, musicLevel: 1, pulses: [], musicAnimation: .pulse)))
+        png("light-call", soft(GlowFrame(time: 1.1, bands: [], musicLevel: 0, pulses: [GlowPulse(kind: .call, color: NotificationClassifier.call, start: 0)])), light: true)
         for anim in MusicAnimation.allCases {
             png("music-\(anim.rawValue)", GlowFrame(time: 3, bands: bands, musicLevel: 1, pulses: [], musicAnimation: anim))
         }

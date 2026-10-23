@@ -11,21 +11,21 @@ public struct Classified: Equatable {
 /// Decides what a notification banner is and what colour its glow should be, from the text on the banner.
 public enum NotificationClassifier {
     static let apps: [(name: String, color: RGB)] = [
-        ("Messages", RGB(0.20, 0.60, 1.00)),
-        ("Mail", RGB(0.29, 0.66, 1.00)),
-        ("Slack", RGB(0.92, 0.25, 0.60)),
-        ("Discord", RGB(0.35, 0.40, 0.95)),
-        ("WhatsApp", RGB(0.15, 0.83, 0.40)),
-        ("Telegram", RGB(0.16, 0.67, 0.93)),
-        ("Calendar", RGB(1.00, 0.30, 0.25)),
-        ("Reminders", RGB(1.00, 0.60, 0.15)),
-        ("Teams", RGB(0.45, 0.45, 0.90)),
-        ("Zoom", RGB(0.18, 0.55, 1.00)),
+        ("Messages", RGB(0.10, 0.40, 0.90)),
+        ("Mail", RGB(0.12, 0.42, 0.85)),
+        ("Slack", RGB(0.75, 0.12, 0.45)),
+        ("Discord", RGB(0.25, 0.28, 0.80)),
+        ("WhatsApp", RGB(0.05, 0.60, 0.28)),
+        ("Telegram", RGB(0.05, 0.45, 0.75)),
+        ("Calendar", RGB(0.85, 0.15, 0.12)),
+        ("Reminders", RGB(0.88, 0.42, 0.05)),
+        ("Teams", RGB(0.30, 0.30, 0.75)),
+        ("Zoom", RGB(0.08, 0.35, 0.85)),
     ]
     static let callApps = ["FaceTime", "Phone"]
     static let callPhrases = ["incoming call", "is calling", "calling…", "calling...", "facetime audio", "facetime video"]
-    public static let call = RGB(0.20, 0.85, 0.40)
-    public static let fallback = RGB(0.80, 0.88, 1.00)
+    public static let call = RGB(0.08, 0.62, 0.28)
+    public static let fallback = RGB(0.30, 0.45, 0.80)
 
     public static func classify(_ texts: [String]) -> Classified {
         let joined = texts.joined(separator: " \n ").lowercased()

@@ -42,7 +42,7 @@ final class Settings {
 
     // Size and brightness
     var thickness: Double { get { number("thickness", 1.0) } set { d.set(newValue, forKey: "thickness") } }
-    var brightness: Double { get { number("brightness", 0.9) } set { d.set(newValue, forKey: "brightness") } }
+    var brightness: Double { get { number("brightness", 0.65) } set { d.set(newValue, forKey: "brightness") } }
 
     func resetLook() {
         for k in ["musicColors", "musicAnimation", "alertAnimation", "matchAppColour", "notificationColor", "callColor", "thickness", "brightness"] {

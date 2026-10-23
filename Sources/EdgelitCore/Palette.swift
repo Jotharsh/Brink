@@ -49,10 +49,10 @@ public enum GlowStyle: String, CaseIterable {
 
     public var colors: [RGB] {
         switch self {
-        case .aurora: return [RGB(0.10, 0.90, 0.70), RGB(0.65, 0.35, 1.00)]
-        case .ember: return [RGB(1.00, 0.30, 0.20), RGB(1.00, 0.70, 0.20)]
-        case .ocean: return [RGB(0.10, 0.50, 1.00), RGB(0.10, 0.90, 0.95)]
-        case .mono: return [RGB(1, 1, 1)]
+        case .aurora: return [RGB(0.00, 0.62, 0.55), RGB(0.42, 0.22, 0.85)]
+        case .ember: return [RGB(0.85, 0.18, 0.12), RGB(0.90, 0.50, 0.05)]
+        case .ocean: return [RGB(0.05, 0.28, 0.85), RGB(0.00, 0.62, 0.78)]
+        case .mono: return [RGB(0.55, 0.58, 0.65)]
         }
     }
 }
