@@ -10,6 +10,10 @@ if let i = CommandLine.arguments.firstIndex(of: "--hero"), i + 1 < CommandLine.a
     Preview.hero(to: CommandLine.arguments[i + 1])
     exit(0)
 }
+if let i = CommandLine.arguments.firstIndex(of: "--frames"), i + 1 < CommandLine.arguments.count {
+    Preview.frames(to: CommandLine.arguments[i + 1])
+    exit(0)
+}
 if CommandLine.arguments.contains("--bench") { Preview.bench(); exit(0) }
 
 let app = NSApplication.shared

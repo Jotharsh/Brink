@@ -109,3 +109,45 @@ extension Preview {
             .write(to: URL(fileURLWithPath: path))
     }
 }
+
+extension Preview {
+    /// Renders a 15-second showcase as PNG frames (music in three styles, then a notification, then a call).
+    /// Used to make demo videos with the real drawing code.
+    static func frames(to folder: String, fps: Int = 30) {
+        try? FileManager.default.createDirectory(atPath: folder, withIntermediateDirectories: true)
+        let size = CGSize(width: 960, height: 600)
+        var smoother: BandSmoother = { var s = BandSmoother(bandCount: 32); s.release = 0.13; return s }()
+        var beat = BeatTracker()
+        var musicLevel: Float = 0, phase = 0.0
+        let blue = NotificationClassifier.classify(["Messages"]).color
+        let total = 15 * fps
+        for i in 0..<total {
+            let t = Double(i) / Double(fps), dt = Float(1.0 / Double(fps))
+            let musicOn = t < 9.0
+            let live = GlowEngine.demoBands(at: t + 20)
+            let bands = smoother.update(musicOn ? live : [Float](repeating: 0, count: 32), dt: dt)
+            let bass = live.prefix(8).reduce(0, +) / 8, body = live.dropFirst(8).prefix(8).reduce(0, +) / 8
+            let energy = beat.update(musicOn ? bass * 0.75 + body * 0.25 : 0, dt: dt)
+            phase = (phase + Double(dt) * Double(0.03 + 0.10 * energy)).truncatingRemainder(dividingBy: 1)
+            let goal: Float = musicOn ? 1 : 0
+            musicLevel += (goal - musicLevel) * (1 - expf(-dt / (goal > musicLevel ? 0.35 : 0.5)))
+
+            let animation: MusicAnimation = t < 3 ? .pulse : (t < 6 ? .flow : .segments)
+            let colours = t < 3 ? GlowStyle.aurora.colors : (t < 6 ? GlowStyle.ocean.colors : GlowStyle.ember.colors)
+            var pulses: [GlowPulse] = []
+            if t >= 9.4 && t < 11.8 { pulses.append(GlowPulse(kind: .notification, color: blue, start: 9.4, duration: 2.4)) }
+            if t >= 12 { pulses.append(GlowPulse(kind: .call, color: NotificationClassifier.call, start: 12)) }
+            let frame = GlowFrame(time: t, bands: bands, musicLevel: musicLevel, pulses: pulses, musicColors: colours,
+                                  musicAnimation: animation, alertAnimation: .pulse, thickness: 1.5, brightness: 0.95,
+                                  energy: energy, phase: phase)
+
+            let ctx = CGContext(data: nil, width: Int(size.width), height: Int(size.height), bitsPerComponent: 8, bytesPerRow: 0,
+                                space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+            ctx.setFillColor(CGColor(srgbRed: 0.055, green: 0.058, blue: 0.072, alpha: 1))
+            ctx.fill(CGRect(origin: .zero, size: size))
+            GlowRenderer.draw(frame, in: ctx, size: size)
+            let name = String(format: "%@/%04d.png", folder, i)
+            try? NSBitmapImageRep(cgImage: ctx.makeImage()!).representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: name))
+        }
+    }
+}
