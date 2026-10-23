@@ -115,7 +115,8 @@ extension Preview {
     /// Used to make demo videos with the real drawing code.
     static func frames(to folder: String, fps: Int = 30) {
         try? FileManager.default.createDirectory(atPath: folder, withIntermediateDirectories: true)
-        let size = CGSize(width: 960, height: 600)
+        let side = Double(ProcessInfo.processInfo.environment["BRINK_FRAME_SQUARE"] ?? "") ?? 0     // e.g. 900 for a square clip
+        let size = side > 0 ? CGSize(width: side, height: side) : CGSize(width: 960, height: 600)
         var smoother: BandSmoother = { var s = BandSmoother(bandCount: 32); s.release = 0.13; return s }()
         var beat = BeatTracker()
         var musicLevel: Float = 0, phase = 0.0
