@@ -121,6 +121,8 @@ extension Preview {
         var musicLevel: Float = 0, phase = 0.0
         let blue = NotificationClassifier.classify(["Messages"]).color
         let total = 15 * fps
+        // BRINK_FRAME_THICKNESS=2.6 makes the showcase thicker and brighter, for small or busy places like a web page
+        let thick = CGFloat(Double(ProcessInfo.processInfo.environment["BRINK_FRAME_THICKNESS"] ?? "") ?? 1.5)
         for i in 0..<total {
             let t = Double(i) / Double(fps), dt = Float(1.0 / Double(fps))
             let musicOn = t < 9.0
@@ -138,7 +140,7 @@ extension Preview {
             if t >= 9.4 && t < 11.8 { pulses.append(GlowPulse(kind: .notification, color: blue, start: 9.4, duration: 2.4)) }
             if t >= 12 { pulses.append(GlowPulse(kind: .call, color: NotificationClassifier.call, start: 12)) }
             let frame = GlowFrame(time: t, bands: bands, musicLevel: musicLevel, pulses: pulses, musicColors: colours,
-                                  musicAnimation: animation, alertAnimation: .pulse, thickness: 1.5, brightness: 0.95,
+                                  musicAnimation: animation, alertAnimation: .pulse, thickness: thick, brightness: 1.0,
                                   energy: energy, phase: phase)
 
             let ctx = CGContext(data: nil, width: Int(size.width), height: Int(size.height), bitsPerComponent: 8, bytesPerRow: 0,
