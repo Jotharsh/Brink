@@ -1,14 +1,14 @@
 import AVFoundation
 import CoreMedia
-import EdgelitCore
+import BrinkCore
 import ScreenCaptureKit
 
 /// Listens to everything the Mac is playing (not the microphone) using ScreenCaptureKit's audio capture.
-/// Needs the Screen Recording permission. Edgelit never records or stores any audio: each block is
+/// Needs the Screen Recording permission. Brink never records or stores any audio: each block is
 /// turned into a few loudness numbers and thrown away.
 final class AudioTap: NSObject, SCStreamOutput, SCStreamDelegate {
     private let pipeline: AudioPipeline
-    private let queue = DispatchQueue(label: "edgelit.audio", qos: .userInteractive)
+    private let queue = DispatchQueue(label: "brink.audio", qos: .userInteractive)
     private var stream: SCStream?
     private(set) var running = false
     var onActivity: (() -> Void)?
@@ -26,7 +26,7 @@ final class AudioTap: NSObject, SCStreamOutput, SCStreamDelegate {
         Task {
             do {
                 let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: false)
-                guard let display = content.displays.first else { throw NSError(domain: "Edgelit", code: 1, userInfo: [NSLocalizedDescriptionKey: "No display found"]) }
+                guard let display = content.displays.first else { throw NSError(domain: "Brink", code: 1, userInfo: [NSLocalizedDescriptionKey: "No display found"]) }
                 let filter = SCContentFilter(display: display, excludingApplications: [], exceptingWindows: [])
                 let cfg = SCStreamConfiguration()
                 cfg.capturesAudio = true

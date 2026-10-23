@@ -229,12 +229,11 @@ public enum GlowRenderer {
                                     colors: [CGColor(gray: 1, alpha: 0.5), CGColor(gray: 1, alpha: 1), CGColor(gray: 1, alpha: 1), CGColor(gray: 1, alpha: 0.5)] as CFArray,
                                     locations: [0, cornerFade, 1 - cornerFade, 1]) else { return }
 
-        let rect = CGRect(x: 0, y: 0, width: length, height: depth)
+        let rect = CGRect(x: 0, y: 0, width: length, height: depth + 3)   // a little past the fade, so no hard edge shows
         ctx.saveGState()
         ctx.concatenate(transform(for: side, size))
         ctx.setAlpha(alpha)
         ctx.beginTransparencyLayer(in: rect, auxiliaryInfo: nil)
-        ctx.clip(to: rect)
         ctx.drawLinearGradient(color, start: .zero, end: CGPoint(x: length, y: 0), options: [.drawsBeforeStartLocation, .drawsAfterEndLocation])
         ctx.setBlendMode(.destinationIn)
         ctx.drawLinearGradient(vertical, start: .zero, end: CGPoint(x: 0, y: depth), options: [.drawsBeforeStartLocation, .drawsAfterEndLocation])

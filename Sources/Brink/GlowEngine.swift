@@ -1,8 +1,8 @@
 import AppKit
-import EdgelitCore
+import BrinkCore
 
 /// Owns the overlay windows and the animation clock. It only ticks while there is something to show,
-/// so an idle Edgelit costs next to nothing.
+/// so an idle Brink costs next to nothing.
 final class GlowEngine {
     private var windows: [OverlayWindow] = []
     private var timer: Timer?

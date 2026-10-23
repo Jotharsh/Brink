@@ -1,5 +1,5 @@
 import AppKit
-import EdgelitCore
+import BrinkCore
 import SwiftUI
 
 private extension RGB {

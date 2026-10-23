@@ -1,5 +1,5 @@
 import AppKit
-import EdgelitCore
+import BrinkCore
 
 enum Preview {
     static func write(to folder: String) {
@@ -55,5 +55,57 @@ extension Preview {
             GlowRenderer.draw(GlowFrame(time: Double(i) / 60, bands: bands, musicLevel: 1, pulses: []), in: ctx, size: CGSize(width: w, height: h))
         }
         print(String(format: "%.1f ms per frame at %dx%d (the size drawn live)", (CFAbsoluteTimeGetCurrent() - start) / Double(n) * 1000, w, h))
+    }
+}
+
+extension Preview {
+    /// A sheet of six looks, for the README. These are rendered by the real drawing code, on a stand-in desktop.
+    static func hero(to path: String) {
+        let tile = CGSize(width: 800, height: 500), gap: CGFloat = 40, label: CGFloat = 70
+        let cols = 3, rows = 2
+        let W = Int(CGFloat(cols) * tile.width + CGFloat(cols + 1) * gap)
+        let H = Int(CGFloat(rows) * (tile.height + label) + CGFloat(rows + 1) * gap)
+        let ctx = CGContext(data: nil, width: W, height: H, bitsPerComponent: 8, bytesPerRow: 0,
+                            space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+        ctx.setFillColor(CGColor(srgbRed: 0.045, green: 0.047, blue: 0.058, alpha: 1))
+        ctx.fill(CGRect(x: 0, y: 0, width: W, height: H))
+
+        var smoother = BandSmoother(bandCount: 32)
+        var bands: [Float] = []
+        var t = 10.0
+        for _ in 0..<158 { bands = smoother.update(GlowEngine.demoBands(at: t), dt: 1 / 60); t += 1 / 60 }
+        let blue = NotificationClassifier.classify(["Messages"]).color
+        let n = GlowPulse(kind: .notification, color: blue, start: 0, duration: 2.4)
+        let call = GlowPulse(kind: .call, color: NotificationClassifier.call, start: 0)
+
+        let items: [(String, GlowFrame)] = [
+            ("Music  ·  Pulse", GlowFrame(time: 3, bands: bands, musicLevel: 1, pulses: [], musicAnimation: .pulse, energy: 0.9)),
+            ("Music  ·  Flow", GlowFrame(time: 3, bands: bands, musicLevel: 1, pulses: [], musicColors: GlowStyle.ocean.colors, musicAnimation: .flow, energy: 0.9, phase: 0.2)),
+            ("Music  ·  Segments", GlowFrame(time: 3, bands: bands, musicLevel: 1, pulses: [], musicColors: GlowStyle.ember.colors, musicAnimation: .segments, energy: 0.9)),
+            ("Notification  ·  Sweep", GlowFrame(time: 0.7, bands: [], musicLevel: 0, pulses: [n], alertAnimation: .sweep)),
+            ("Notification  ·  Pulse", GlowFrame(time: 1.2, bands: [], musicLevel: 0, pulses: [n], alertAnimation: .pulse)),
+            ("Incoming call", GlowFrame(time: 1.1, bands: [], musicLevel: 0, pulses: [call], alertAnimation: .pulse)),
+        ]
+        for (i, item) in items.enumerated() {
+            let col = i % cols, row = rows - 1 - i / cols
+            let x = gap + CGFloat(col) * (tile.width + gap)
+            let y = gap + CGFloat(row) * (tile.height + label + gap) + label
+            let rect = CGRect(x: x, y: y, width: tile.width, height: tile.height)
+            ctx.saveGState()
+            ctx.addPath(CGPath(roundedRect: rect, cornerWidth: 18, cornerHeight: 18, transform: nil)); ctx.clip()
+            ctx.setFillColor(CGColor(srgbRed: 0.075, green: 0.077, blue: 0.09, alpha: 1)); ctx.fill(rect)
+            ctx.translateBy(x: x, y: y)
+            var f = item.1; f.brightness = 1.0; f.thickness = 1.6
+            GlowRenderer.draw(f, in: ctx, size: tile)
+            ctx.restoreGState()
+
+            let ns = NSGraphicsContext(cgContext: ctx, flipped: false)
+            NSGraphicsContext.saveGraphicsState(); NSGraphicsContext.current = ns
+            (item.0 as NSString).draw(at: CGPoint(x: x + 6, y: y - 52),
+                                      withAttributes: [.font: NSFont.systemFont(ofSize: 30, weight: .medium), .foregroundColor: NSColor(white: 0.82, alpha: 1)])
+            NSGraphicsContext.restoreGraphicsState()
+        }
+        try? NSBitmapImageRep(cgImage: ctx.makeImage()!).representation(using: .png, properties: [:])?
+            .write(to: URL(fileURLWithPath: path))
     }
 }

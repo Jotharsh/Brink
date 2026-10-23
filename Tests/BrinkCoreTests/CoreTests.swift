@@ -1,5 +1,5 @@
 import XCTest
-@testable import EdgelitCore
+@testable import BrinkCore
 
 final class CoreTests: XCTestCase {
     func sine(_ hz: Float, count: Int = 1024, rate: Float = 48000, amp: Float = 0.5) -> [Float] {

@@ -1,5 +1,5 @@
 import AppKit
-import EdgelitCore
+import BrinkCore
 
 /// Shows the current frame. The glow is soft by nature, so it is drawn small (a quarter of the screen's
 /// size in each direction) and the GPU stretches it to fit. That keeps each frame cheap enough for 60 fps.

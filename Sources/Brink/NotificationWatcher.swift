@@ -1,6 +1,6 @@
 import AppKit
 import ApplicationServices
-import EdgelitCore
+import BrinkCore
 
 /// Notices when macOS shows a notification banner, by watching the Notification Center process through the
 /// Accessibility API. Apple offers no official way to be told about other apps' notifications, so this is

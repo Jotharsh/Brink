@@ -1,4 +1,4 @@
-import EdgelitCore
+import BrinkCore
 import Foundation
 
 /// User choices, kept in UserDefaults. The engine reads these every frame, so changes show up instantly.

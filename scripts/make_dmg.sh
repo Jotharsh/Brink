@@ -1,10 +1,10 @@
 #!/bin/bash
-# Packages dist/Edgelit.app into dist/Edgelit.dmg with a shortcut to /Applications.
+# Packages dist/Brink.app into dist/Brink.dmg with a shortcut to /Applications.
 # Uses create-dmg (brew install create-dmg) for a styled window if it's installed, else plain hdiutil.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-APP_NAME="Edgelit"
+APP_NAME="Brink"
 OUT_DIR="${OUT_DIR:-dist}"
 APP="$OUT_DIR/$APP_NAME.app"
 DMG="$OUT_DIR/$APP_NAME.dmg"

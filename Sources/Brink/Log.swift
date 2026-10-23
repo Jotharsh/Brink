@@ -1,9 +1,9 @@
 import Foundation
 
-/// A small log at ~/Library/Logs/Edgelit.log, so problems with permissions can be diagnosed.
+/// A small log at ~/Library/Logs/Brink.log, so problems with permissions can be diagnosed.
 enum Log {
-    static let url = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Logs/Edgelit.log")
-    private static let queue = DispatchQueue(label: "edgelit.log")
+    static let url = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Logs/Brink.log")
+    private static let queue = DispatchQueue(label: "brink.log")
 
     static func write(_ message: String) {
         let line = "\(ISO8601DateFormatter().string(from: Date())) \(message)\n"

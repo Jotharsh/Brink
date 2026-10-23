@@ -1,5 +1,5 @@
 import AppKit
-import EdgelitCore
+import BrinkCore
 import SwiftUI
 
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
@@ -21,7 +21,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let button = statusItem.button {
-            let img = NSImage(systemSymbolName: "rays", accessibilityDescription: "Edgelit")
+            let img = NSImage(systemSymbolName: "rays", accessibilityDescription: "Brink")
             img?.isTemplate = true
             button.image = img
         }
@@ -62,11 +62,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private func notificationColor(for c: Classified) -> RGB { settings.matchAppColour ? c.color : settings.notificationColor }
 
-    // MARK: edgelit:// links
+    // MARK: brink:// links
 
     @objc private func handleURL(_ event: NSAppleEventDescriptor, reply: NSAppleEventDescriptor) {
         guard let s = event.paramDescriptor(forKeyword: AEKeyword(keyDirectObject))?.stringValue,
-              let url = URL(string: s), url.scheme == "edgelit" else { return }
+              let url = URL(string: s), url.scheme == "brink" else { return }
         let q = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
         func value(_ k: String) -> String? { q.first { $0.name == k }?.value }
         switch url.host {
@@ -84,7 +84,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
-        let title = NSMenuItem(title: "Edgelit", action: nil, keyEquivalent: "")
+        let title = NSMenuItem(title: "Brink", action: nil, keyEquivalent: "")
         title.isEnabled = false
         menu.addItem(title)
         menu.addItem(.separator())
@@ -104,7 +104,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(permissionItem(ok: NotificationWatcher.isTrusted, name: "Accessibility (for notifications)",
                                     action: #selector(grantAccessibility)))
         if !AudioTap.hasPermission || !NotificationWatcher.isTrusted {
-            menu.addItem(action("Restart Edgelit (after allowing, to apply)", #selector(restart)))
+            menu.addItem(action("Restart Brink (after allowing, to apply)", #selector(restart)))
         }
         if let e = lastAudioError, settings.music, AudioTap.hasPermission {
             let item = NSMenuItem(title: "Audio problem: \(e)", action: nil, keyEquivalent: "")
@@ -123,7 +123,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(test)
         menu.addItem(.separator())
         menu.addItem(action("Show log in Finder", #selector(showLog)))
-        menu.addItem(action("Quit Edgelit", #selector(quit), key: "q"))
+        menu.addItem(action("Quit Brink", #selector(quit), key: "q"))
     }
 
     private func toggle(_ title: String, on: Bool, _ sel: Selector) -> NSMenuItem {
@@ -159,7 +159,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                                     tryCall: { [weak self] in self?.testCall() },
                                     stopCall: { [weak self] in self?.engine.clearCalls() })
             let w = NSWindow(contentViewController: NSHostingController(rootView: view))
-            w.title = "Edgelit"
+            w.title = "Brink"
             w.styleMask = [.titled, .closable]
             w.isReleasedWhenClosed = false
             w.center()

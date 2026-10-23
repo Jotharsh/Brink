@@ -1,19 +1,19 @@
 #!/bin/bash
-# Builds dist/Edgelit.app (release, ad-hoc signed so it runs locally).
+# Builds dist/Brink.app (release, ad-hoc signed so it runs locally).
 #
 # Optional environment:
 #   OUT_DIR=dist         where to put the app (default dist/)
 #   VERSION=1.0.2        marketing version
 #   BUILD_NUMBER=1       build number
-#   BUNDLE_ID=...        bundle identifier (default io.github.jotharsh.Edgelit - set your own)
+#   BUNDLE_ID=...        bundle identifier (default io.github.jotharsh.Brink - set your own)
 #   ARCHS="arm64"        architectures (default: arm64 x86_64, a universal binary)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-APP_NAME="Edgelit"
+APP_NAME="Brink"
 VERSION="${VERSION:-1.0.0}"
 BUILD_NUMBER="${BUILD_NUMBER:-1}"
-BUNDLE_ID="${BUNDLE_ID:-io.github.jotharsh.Edgelit}"
+BUNDLE_ID="${BUNDLE_ID:-io.github.jotharsh.Brink}"
 ARCHS="${ARCHS:-arm64 x86_64}"
 
 OUT_DIR="${OUT_DIR:-dist}"
